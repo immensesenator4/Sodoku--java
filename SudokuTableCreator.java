@@ -1,32 +1,22 @@
 
+import java.util.ArrayList;
 
 
 
-public class SudokuTableCreator
+
+
+public final class SudokuTableCreator
 {
-    private int all_ran;
-    private static int counter;
-    private static int r=0;
-    private static int c=0;
+    private  int counter;
+    private  int r=0;
+    private  int c=0;
     private static Table[][] all;
     private int[][] table = new int[3][3];
     private final Solution[][] solutions = new Solution[3][3];
     public SudokuTableCreator()
     {
         
-        if( c >2)
-        {
-            r++;
-            c=0;
-        }
-        set_all();
-        all[r][c]=new Table(table);
-        if(r==2 && c==2)
-        {
-            check();
-        }
-        c++;
-        all_ran++;
+        reset_all();
         
     }
     public final void check()
@@ -34,13 +24,10 @@ public class SudokuTableCreator
         try{
             int[][] collums= new int[3][9];
             int[][] rows=new int[3][9];
-            boolean failsafe=false;
             for( int row=0; r<3; r++)
             {
-                if (failsafe){break;}
                 for(int col=0; c<3; c++)
                 {
-                    if (failsafe){break;}
                     for(int z =0; z<3; z++)
                     {
                         for(int y=0; y<3; y++)
@@ -58,18 +45,15 @@ public class SudokuTableCreator
                     {
                         int[] col_nums= new int[9];
                         int[] row_nums= new int[9];
-                        if (failsafe){break;}
                         for (int x = 0; x < 3; x++) 
                         {
-                            if (failsafe){break;}
                             // System.err.println(collums[x][col]-1);
                             // System.out.println(collums[row][x]-1);
-                            if(col_nums[collums[x][col]-1]!=0||row_nums[collums[row][x]-1]!=0)
+                            if(col_nums[collums[col][(y*3)+x]-1]!=0||row_nums[collums[row][(y*3)+x]-1]!=0)
                             {
                                 set_table();
                                 reset_all();
                                 check();
-                                failsafe=true;
                                 return;
                             }
                             else
@@ -87,10 +71,24 @@ public class SudokuTableCreator
         {
             set_table();
             reset_all();
-            check();
             
-            return;
         }
+    }
+    public static void makeBlanks(int amt)
+    {
+        int count=0;
+        ArrayList<ArrayList<Integer>>  blank = new ArrayList<>();
+        while (count<amt) 
+        {
+            int r1 =(int) (Math.random()*3);
+            int c1 =(int) (Math.random()*3);
+            int r2 = (int) (Math.random()*3);
+            int c2 =(int) (Math.random()*3);
+            if(all[r1][c1].getTable()[r2][c2]!=0)
+            {all[r1][c1].removeInt(r2, c2); count++;}
+            
+        }
+        
     }
     public final void reset_all()
     {
@@ -99,16 +97,20 @@ public class SudokuTableCreator
             r=i;
             for (int x = 0; x < 3; x++) 
             {
-             c=i;   
+             c=x;   
              table= new int[3][3];
              set_all();
-             all[r][c]= all[r][c]=new Table(table);
+             all[r][c]= new Table(table);
+             if (r==2&&c==2)
+             {
+                check();
+             }
             }
         }
     }
     public final void set_all()
     {
-        boolean failsafe=false;
+
         int[][] collums= new int[3][9];
         int[][] rows=new int[3][9];
         for(int z =0; z<3; z++)
@@ -125,18 +127,11 @@ public class SudokuTableCreator
        
         for (int row = 0; row < 3; row++) 
         {
-            onlyset(rows, collums);
-            if (failsafe)
-            {
-                break;
-            }
+
            for (int col = 0; col < 3; col++) 
            {
-                
-                if (failsafe)
-                {
-                    break;
-                }
+            onlyset(rows, collums);
+
                 int[] finaly;
                 int[] nums ={1,2,3,4,5,6,7,8,9};
                 int count=0;
@@ -184,41 +179,22 @@ public class SudokuTableCreator
                     counter++;
                     if( counter >9)
                     {
+                        
                         set_table();
+                        counter=0;
                     }
                     set_all();
+
                     
-                    break;
+                    counter=0;
+                    return;
+                    
                     
                 }
            }
         }
     }
-    public int set(int i,int x)
-    {
-        // System.out.println(Arrays.toString(solutions[i][x].getNums()));
-        int t = solutions[i][x].getNums()[(int) (Math.random()*(solutions[i][x].getNums().length-1))];
-        for(Solution[] arr: solutions)
-        {
-            for(Solution sol:arr)
-            {
-
-                if(sol.contains(sol.getNums(), t)==true)
-                {
-                    
-                   if( !(sol.popout(t))&&!(sol.issame(solutions[i][x])))
-                    {
-                        
-                        return  set(i, x);
-                    }
-                }
-
-            }
-          
-        }
-        solutions[i][x]=new Solution(new int[]{200,300});
-        return t;
-    }
+    
     public void onlyset(int[][] rows,int[][] cols)
     {
         for (int row = 0; row < 3; row++) 
